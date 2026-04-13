@@ -4,6 +4,27 @@
 
 ---
 
+## Top 10 — Must Prepare These First
+
+These will come up in almost every interview. Prioritize these above everything else.
+
+| Priority | Question | Why It Matters |
+|----------|---------|----------------|
+| 🔴 Must nail | Walk me through what Fortune AI does end to end | Every interview opens here — practice as a 2-min verbal, not a reading |
+| 🔴 Must nail | What is RAG and why did you use it instead of fine-tuning? | #1 AI architecture question — can't build RAG and not explain it |
+| 🔴 Must nail | How does your retrieval step actually work? | One level deeper — question → vector → cosine similarity → top-5 → context |
+| 🔴 Must nail | Walk me through your anomaly detection logic | Shows real design decisions — know 4 categories + 3 severity tiers cold |
+| 🔴 Must nail | How do you prevent Claude from hallucinating financial data? | Critical for any AI project in finance |
+| 🟡 Should nail | How is the AI narrative different from the statistical forecast? | Most likely forecasting follow-up — two sentence answer |
+| 🟡 Should nail | What does R² tell you and when would you not trust the forecast? | Shows you understand your model's limits — use NVDA as example |
+| 🟡 Should nail | What was the hardest technical challenge and how did you solve it? | Yahoo Finance → FMP story is perfect here |
+| 🟢 Good to have | Why SQLite? Why ChromaDB? Why Streamlit? | Know what you'd use in production instead |
+| 🟢 Good to have | How would you scale this to production / 500 companies? | Standard system design follow-up |
+
+**If you can answer the 5 🔴 questions fluently, you'll pass most AI/ML rounds comfortably.**
+
+---
+
 ## 1. Project Overview
 
 **Q: Walk me through what Fortune AI does end to end.**

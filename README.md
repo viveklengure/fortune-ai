@@ -1,60 +1,57 @@
 # Fortune AI — Financial Intelligence Platform
 
-An AI-powered financial intelligence platform covering Fortune 500 technology companies. Pulls real financial data, stores it locally, and provides RAG-powered Q&A, anomaly detection, and AI-generated executive digests — all inside a Streamlit web app.
+AI-powered financial analytics covering 19 Fortune 500 technology companies. Combines real market data, vector search, and Claude to deliver RAG-powered Q&A, anomaly detection, 2-year forecasting, peer comparison, and portfolio analysis — all in a 9-page Streamlit app.
+
+---
+
+## Quick Start
+
+```bash
+git clone https://github.com/viveklengure/fortune-ai.git
+cd fortune-ai
+python -m venv venv && source venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env   # add your API keys
+python run.py          # Option 3 → full setup, Option 4 → launch app
+```
+
+**API keys needed:**
+- `ANTHROPIC_API_KEY` — [console.anthropic.com](https://console.anthropic.com)
+- `FMP_API_KEY` — [financialmodelingprep.com/developer/docs](https://financialmodelingprep.com/developer/docs) (free tier)
+
+---
 
 ## Architecture
 
 ```
-yfinance → SQLite → sentence-transformers → ChromaDB
+FMP API → SQLite → sentence-transformers → ChromaDB
                 ↓
-         LangChain RAG → Claude API → Streamlit (5 pages)
+         LangChain RAG → Claude API → Streamlit (9 pages)
 ```
 
-## Setup
+## Pages
 
-```bash
-# 1. Clone / navigate to the project
-cd fortune-ai
+| # | Page | What it does |
+|---|------|-------------|
+| 1 | Dashboard | KPI cards, top-10 revenue chart, market cap scatter |
+| 2 | RAG Chat | Natural language Q&A over financial data |
+| 3 | Anomaly Monitor | AI-narrated anomaly detection with severity tiers |
+| 4 | Company Explorer | Per-company financials, charts, YoY trend analysis |
+| 5 | Daily Digest | One-click AI portfolio executive summary |
+| 6 | Forecasting | Linear regression + Claude analyst outlook |
+| 7 | Peer Comparison | Side-by-side metrics + AI comparison |
+| 8 | Portfolio Trends | Sparkline grid, top/bottom performers |
+| 9 | Sector Analysis | Revenue and margin aggregates by sector |
 
-# 2. Create and activate virtual environment
-python -m venv venv
-source venv/bin/activate        # macOS/Linux
-# venv\Scripts\activate         # Windows
+---
 
-# 3. Install dependencies
-pip install -r requirements.txt
+## Docs
 
-# 4. Configure your API key
-cp .env.example .env
-# Edit .env and add your Anthropic API key
-```
+- [`PLATFORM_OVERVIEW.md`](PLATFORM_OVERVIEW.md) — full feature scope, data layer, AI stack, anomaly criteria
+- [`EXECUTION_GUIDE.md`](EXECUTION_GUIDE.md) — step-by-step technical walkthrough of every module
 
-## Usage
+---
 
-```bash
-python run.py
-```
+## Tech Stack
 
-Select **Option 3** (Full setup) on first run to ingest financial data and generate embeddings. This takes ~2–3 minutes.
-
-Then select **Option 4** to launch the Streamlit app in your browser.
-
-## Features
-
-| Page | Description |
-|------|-------------|
-| Dashboard | KPI cards, top-10 revenue bar chart, market cap vs revenue scatter |
-| RAG Chat | Ask natural-language questions about any company's financials |
-| Anomaly Monitor | AI-narrated detection of revenue declines, margin compression, valuation outliers |
-| Company Explorer | Per-company financial profile with 4-year revenue & net income charts |
-| Daily Digest | One-click AI executive summary of the full portfolio |
-
-## Companies Covered
-
-AAPL, MSFT, AMZN, GOOGL, META, ORCL, CRM, NVDA, NFLX, SNOW, IBM, SAP, NOW, WDAY, PLTR, ADBE, INTU, QCOM, AVGO
-
-## Interview Talking Points
-
-- **End-to-end RAG pipeline**: Combines yfinance data ingestion, SQLite storage, ChromaDB vector search, LangChain orchestration, and Claude — demonstrating how to build a production-grade retrieval-augmented generation system from scratch.
-- **Agentic anomaly detection**: The agent module autonomously identifies financial red flags across 19 companies and calls Claude to generate analyst-quality narratives, showcasing tool-augmented LLM reasoning.
-- **Full-stack AI application**: Streamlit + Plotly frontend with modular Python backend illustrates how to ship an interactive AI product with clean separation of concerns (ingest, embed, RAG, agent, UI layers).
+Python · Claude Sonnet · LangChain · ChromaDB · sentence-transformers · Streamlit · Plotly · SQLite · NumPy · Financial Modeling Prep API

@@ -105,14 +105,21 @@ For each company, the platform ingests:
 - Returns: answer text + source tickers
 
 ### 4. Anomaly Detection Agent (`src/agent.py` + Page 3)
-- Scans all 19 companies against 4 financial rules:
-  - Revenue decline: YoY growth < -5%
-  - Net income drop: YoY growth < -20%
-  - Valuation outlier: PE ratio > 100 or < 0
-  - Margin compression: Gross margin < 20%
-- For each triggered rule, calls Claude to write a 2–3 sentence analyst narrative
+- Scans all 19 companies against 4 financial anomaly categories, each with a 3-tier severity system
+- For each triggered rule, calls Claude to write a 2–3 sentence factual analyst narrative
 - Returns severity (high/medium/low), metric value, and AI explanation per anomaly
-- Displayed as expandable cards with color-coded severity badges
+- Displayed as expandable cards with color-coded severity badges (🔴 High / 🟡 Medium / 🟢 Low)
+
+**Severity Framework:**
+
+| Anomaly | 🔴 High | 🟡 Medium | 🟢 Low |
+|---------|---------|-----------|--------|
+| **Revenue Decline** | YoY growth < -15% | YoY growth < -5% | YoY growth < -2% |
+| **Net Income Drop** | YoY growth < -25% | YoY growth < -10% | YoY growth < -5% |
+| **Valuation Outlier** | PE > 200 or PE < 0 | PE > 100 | — |
+| **Margin Compression** | Gross margin dropped > 5pp YoY | Dropped > 3pp YoY | Dropped > 1.5pp YoY |
+
+*Margin compression uses true year-over-year percentage point change, not an absolute floor.*
 
 ### 5. AI Executive Digest (`src/digest.py` + Page 5)
 - Aggregates all 19 companies' latest financials

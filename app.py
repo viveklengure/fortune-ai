@@ -196,6 +196,13 @@ elif page == "RAG Chat":
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = []
 
+    if st.session_state.chat_history:
+        if st.button("Clear conversation"):
+            from src.rag import clear_memory
+            clear_memory()
+            st.session_state.chat_history = []
+            st.rerun()
+
     for msg in st.session_state.chat_history:
         with st.chat_message(msg["role"]):
             st.markdown(msg["content"])

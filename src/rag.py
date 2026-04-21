@@ -1,16 +1,19 @@
 """
 Fortune AI - RAG Pipeline
-LangChain + ChromaDB retriever + Claude for Q&A over financial data.
+ConversationalRetrievalChain with memory: LangChain routes each question through
+ChromaDB retrieval and maintains conversation history so follow-up questions work.
 """
 
 import os
 from pathlib import Path
 
 from dotenv import load_dotenv
-import chromadb
-from sentence_transformers import SentenceTransformer
 from langchain_anthropic import ChatAnthropic
-from langchain.schema import HumanMessage, SystemMessage
+from langchain_chroma import Chroma
+from langchain.chains import ConversationalRetrievalChain
+from langchain.memory import ConversationBufferMemory
+from langchain.prompts import SystemMessagePromptTemplate, HumanMessagePromptTemplate, ChatPromptTemplate
+from langchain_community.embeddings import SentenceTransformerEmbeddings
 
 load_dotenv()
 
@@ -24,63 +27,82 @@ SYSTEM_PROMPT = (
     "Answer questions accurately using the provided context. "
     "Always cite which companies you are referencing. "
     "Format numbers clearly: use $B for billions, $M for millions, % for percentages. "
-    "If you don't have data for something, say so clearly."
+    "If you don't have data for something, say so clearly.\n\n"
+    "Context:\n{context}"
 )
 
-_model: SentenceTransformer | None = None
-_collection = None
-_llm: ChatAnthropic | None = None
+_chain: ConversationalRetrievalChain | None = None
+_memory: ConversationBufferMemory | None = None
 
 
-def _get_resources():
-    global _model, _collection, _llm
-    if _model is None:
-        _model = SentenceTransformer("all-MiniLM-L6-v2")
-    if _collection is None:
-        client = chromadb.PersistentClient(path=str(CHROMA_PATH))
-        _collection = client.get_collection(COLLECTION_NAME)
-    if _llm is None:
-        _llm = ChatAnthropic(
-            model="claude-sonnet-4-20250514",
-            api_key=os.environ["ANTHROPIC_API_KEY"],
-            max_tokens=1024,
-        )
-    return _model, _collection, _llm
+def _get_chain() -> tuple[ConversationalRetrievalChain, ConversationBufferMemory]:
+    global _chain, _memory
+    if _chain is not None:
+        return _chain, _memory
+
+    llm = ChatAnthropic(
+        model="claude-sonnet-4-20250514",
+        api_key=os.environ["ANTHROPIC_API_KEY"],
+        max_tokens=1024,
+    )
+
+    embeddings = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
+    vectorstore = Chroma(
+        collection_name=COLLECTION_NAME,
+        embedding_function=embeddings,
+        persist_directory=str(CHROMA_PATH),
+    )
+    retriever = vectorstore.as_retriever(search_kwargs={"k": 5})
+
+    _memory = ConversationBufferMemory(
+        memory_key="chat_history",
+        return_messages=True,
+        output_key="answer",
+    )
+
+    combine_docs_prompt = ChatPromptTemplate.from_messages([
+        SystemMessagePromptTemplate.from_template(SYSTEM_PROMPT),
+        HumanMessagePromptTemplate.from_template("{question}"),
+    ])
+
+    _chain = ConversationalRetrievalChain.from_llm(
+        llm=llm,
+        retriever=retriever,
+        memory=_memory,
+        return_source_documents=True,
+        combine_docs_chain_kwargs={"prompt": combine_docs_prompt},
+    )
+    return _chain, _memory
 
 
 def ask(question: str) -> dict:
     """
-    Query the RAG pipeline.
+    Query the conversational RAG pipeline.
     Returns: {"answer": str, "sources": list[str]}
     """
-    model, collection, llm = _get_resources()
+    chain, _ = _get_chain()
+    result = chain.invoke({"question": question})
 
-    query_embedding = model.encode(question).tolist()
-    results = collection.query(
-        query_embeddings=[query_embedding],
-        n_results=5,
-        include=["documents", "metadatas"],
-    )
+    sources = list({
+        doc.metadata.get("ticker", "")
+        for doc in result.get("source_documents", [])
+        if doc.metadata.get("ticker")
+    })
 
-    docs = results["documents"][0]
-    metadatas = results["metadatas"][0]
-    sources = [m["ticker"] for m in metadatas]
+    return {"answer": result["answer"], "sources": sources}
 
-    context = "\n\n".join(
-        f"[{m['ticker']} - {m['company_name']}]\n{doc}"
-        for doc, m in zip(docs, metadatas)
-    )
 
-    messages = [
-        SystemMessage(content=SYSTEM_PROMPT),
-        HumanMessage(content=f"Context:\n{context}\n\nQuestion: {question}"),
-    ]
-
-    response = llm.invoke(messages)
-    return {"answer": response.content, "sources": sources}
+def clear_memory() -> None:
+    """Reset conversation history."""
+    global _memory
+    if _memory is not None:
+        _memory.clear()
 
 
 if __name__ == "__main__":
     result = ask("Which companies have the highest revenue growth?")
     print(result["answer"])
     print("Sources:", result["sources"])
+    result2 = ask("How do their margins compare?")
+    print(result2["answer"])
+    print("Sources:", result2["sources"])

@@ -24,17 +24,28 @@ python run.py          # Option 3 → full setup, Option 4 → launch app
 ## Architecture
 
 ```
-FMP API → SQLite → sentence-transformers → ChromaDB
+FMP API → SQLite → SentenceTransformer embeddings → ChromaDB
                 ↓
-         LangChain RAG → Claude API → Streamlit (9 pages)
+  LangChain ConversationalRetrievalChain + ConversationBufferMemory
+                ↓
+         Claude Sonnet → Streamlit (9 pages)
 ```
+
+## RAG Pipeline
+
+The Q&A page uses a proper conversational RAG setup:
+
+- **Retrieval** — ChromaDB semantic search (top-5 company docs) via LangChain's native Chroma vectorstore retriever
+- **Memory** — `ConversationBufferMemory` keeps full conversation history so follow-up questions work naturally (e.g. *"How do their margins compare?"* after asking about revenue)
+- **Chain** — `ConversationalRetrievalChain` wires retriever → prompt → Claude in one declarative pipeline, replacing manual prompt assembly
+- **Reset** — "Clear conversation" button wipes memory and starts a fresh session
 
 ## Pages
 
 | # | Page | What it does |
 |---|------|-------------|
 | 1 | Dashboard | KPI cards, top-10 revenue chart, market cap scatter |
-| 2 | RAG Chat | Natural language Q&A over financial data |
+| 2 | RAG Chat | Conversational Q&A with memory over financial data |
 | 3 | Anomaly Monitor | AI-narrated anomaly detection with severity tiers |
 | 4 | Company Explorer | Per-company financials, charts, YoY trend analysis |
 | 5 | Daily Digest | One-click AI portfolio executive summary |

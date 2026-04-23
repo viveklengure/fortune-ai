@@ -53,6 +53,23 @@ The Q&A page uses a proper conversational RAG setup:
 | 7 | Peer Comparison | Side-by-side metrics + AI comparison |
 | 8 | Portfolio Trends | Sparkline grid, top/bottom performers |
 | 9 | Sector Analysis | Revenue and margin aggregates by sector |
+| 10 | Company Report | AI analyst report: template-driven, grounded in historical data |
+
+## Company Intelligence Report
+
+Page 10 implements a template-driven AI analytics workflow:
+
+1. **Data context** — historical financials (4 years) + current metrics pulled from SQLite for the selected company
+2. **Template injection** — a structured output template is passed to Claude alongside the data, defining exactly which metrics to produce and in what format
+3. **Grounded generation** — Claude fills in the template using only the real numbers, producing a 5-section report:
+   - **Snapshot** — executive summary (revenue, net income, net margin, market cap)
+   - **Historical Performance** — year-by-year table with YoY growth calculations
+   - **Trend Analysis** — narrative on revenue momentum and margin direction
+   - **Signal** — momentum, margin health, and valuation verdicts
+   - **Analyst Commentary** — executive-friendly paragraph on risks and tailwinds
+4. **Download** — report exportable as `.txt`
+
+This pattern — historical context + structured template + current data — is the architecture behind automated analyst reports at firms like Bloomberg and JPMorgan.
 
 ---
 

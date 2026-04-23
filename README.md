@@ -73,6 +73,49 @@ This pattern — historical context + structured template + current data — is 
 
 ---
 
+## Project Structure
+
+```
+╔══════════════════════════════════════════════════════════════════╗
+║                     🏦  fortune-ai/                              ║
+╠══════════════════════════════════════════════════════════════════╣
+║                                                                  ║
+║  📱 app.py                 Streamlit UI — 10-page application    ║
+║  🚀 run.py                 CLI entry point (setup + launch)      ║
+║  📋 requirements.txt       Python dependencies                   ║
+║                                                                  ║
+╠══════════════╦═══════════════════════════════════════════════════╣
+║  📂 src/     ║   AI & Data Pipeline Modules                      ║
+╠══════════════╬═══════════════════════════════════════════════════╣
+║              ║                                                   ║
+║              ║  🌐 ingest.py      FMP API → SQLite ingestion     ║
+║              ║  🧠 embed.py       Build docs + ChromaDB vectors  ║
+║              ║  💬 rag.py         ConversationalRetrievalChain   ║
+║              ║  📊 report.py      Template-driven AI reports     ║
+║              ║  🔍 agent.py       Anomaly detection engine       ║
+║              ║  📈 forecast.py    Linear regression + narrative  ║
+║              ║  📰 digest.py      Daily portfolio summary        ║
+║              ║  📉 trends.py      Sparklines + sector rollups    ║
+║              ║                                                   ║
+╠══════════════╩═══════════════════════════════════════════════════╣
+║  📂 db/                                                          ║
+║  ├── 🗄️  financial.db      SQLite — companies, financials,       ║
+║  │                          metrics (19 Fortune 500 companies)   ║
+║  └── 🔮 chroma/            ChromaDB vector store                ║
+║                             (384-dim embeddings, 19 documents)   ║
+╠══════════════════════════════════════════════════════════════════╣
+║  📂 data/                                                        ║
+║  ├── raw/                  Raw API responses                     ║
+║  └── processed/            Cleaned intermediate data            ║
+╠══════════════════════════════════════════════════════════════════╣
+║  📄 .env.example           API key template                      ║
+║  📄 PLATFORM_OVERVIEW.md   Full feature + AI stack docs          ║
+║  📄 EXECUTION_GUIDE.md     Step-by-step technical walkthrough    ║
+╚══════════════════════════════════════════════════════════════════╝
+```
+
+---
+
 ## Docs
 
 - [`PLATFORM_OVERVIEW.md`](PLATFORM_OVERVIEW.md) — full feature scope, data layer, AI stack, anomaly criteria

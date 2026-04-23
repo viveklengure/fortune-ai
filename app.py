@@ -115,6 +115,7 @@ pages = [
     "Peer Comparison",
     "Portfolio Trends",
     "Sector Analysis",
+    "Company Report",
 ]
 
 page = st.sidebar.radio("Navigate", pages, index=pages.index(default_page) if default_page in pages else 0)
@@ -917,3 +918,51 @@ elif page == "Sector Analysis":
         fig_sec_bar.update_layout(coloraxis_showscale=False, xaxis_tickangle=-30, height=380)
         fig_sec_bar.update_yaxes(tickformat="$.2s")
         st.plotly_chart(fig_sec_bar, use_container_width=True)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# PAGE 10 — COMPANY REPORT
+# ══════════════════════════════════════════════════════════════════════════════
+elif page == "Company Report":
+    st.title("Company Intelligence Report")
+    st.markdown(
+        "Select a company to generate a structured AI analyst report grounded in "
+        "historical and current financial data."
+    )
+
+    if not db_exists():
+        no_data_msg()
+        st.stop()
+
+    df = load_companies()
+    if df.empty:
+        no_data_msg()
+        st.stop()
+
+    company_options = {
+        row["name"]: row["ticker"]
+        for _, row in df[["name", "ticker"]].dropna().sort_values("name").iterrows()
+    }
+
+    selected_name = st.selectbox("Select Company", list(company_options.keys()))
+    selected_ticker = company_options[selected_name]
+
+    if st.button("Generate Report", type="primary"):
+        with st.spinner(f"Analysing {selected_name}..."):
+            try:
+                from src.report import generate_report
+                result = generate_report(selected_ticker)
+                if "error" in result:
+                    st.error(result["error"])
+                else:
+                    st.success(f"Report generated for {result['company_name']}")
+                    st.markdown("---")
+                    st.code(result["report"], language=None)
+                    st.download_button(
+                        label="Download Report",
+                        data=result["report"],
+                        file_name=f"{selected_ticker}_intelligence_report.txt",
+                        mime="text/plain",
+                    )
+            except Exception as e:
+                st.error(f"Error generating report: {e}")

@@ -247,7 +247,15 @@ elif page == "Anomaly Monitor":
 
     severity_badge = {"high": "🔴 High", "medium": "🟡 Medium", "low": "🟢 Low"}
 
-    if st.button("Run Anomaly Scan", type="primary"):
+    col_btn1, col_btn2 = st.columns(2)
+    run_standard = col_btn1.button("Run Standard Scan", type="primary", help="Fast rule-based scan. No extra API calls.")
+    run_agentic  = col_btn2.button("Run Agentic Scan ✦", help="Claude investigates autonomously using tools. Slower and uses more API tokens.")
+
+    if run_agentic:
+        st.info("🤖 Agentic mode: Claude is investigating the portfolio autonomously. This may take a minute and will use additional API tokens.")
+
+    anomalies = None
+    if run_standard:
         with st.spinner("Scanning portfolio for anomalies..."):
             try:
                 from src.agent import detect_anomalies
@@ -256,6 +264,16 @@ elif page == "Anomaly Monitor":
                 st.error(f"Error running scan: {e}")
                 anomalies = []
 
+    if run_agentic:
+        with st.spinner("Claude is investigating... (this may take a minute)"):
+            try:
+                from src.agent import detect_anomalies_agentic
+                anomalies = detect_anomalies_agentic()
+            except Exception as e:
+                st.error(f"Error running agentic scan: {e}")
+                anomalies = []
+
+    if anomalies is not None:
         if not anomalies:
             st.success("No anomalies detected.")
         else:

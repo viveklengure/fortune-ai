@@ -1,6 +1,6 @@
 # Fortune AI — Financial Intelligence Platform
 
-AI-powered financial analytics covering 19 Fortune 500 technology companies. Combines real market data, vector search, and Claude to deliver RAG-powered Q&A, anomaly detection, 2-year forecasting, peer comparison, and portfolio analysis — all in a 9-page Streamlit app.
+AI-powered financial analytics covering 19 Fortune 500 technology companies. Combines real market data, vector search, and Claude to deliver RAG-powered Q&A, anomaly detection, 2-year forecasting, peer comparison, and portfolio analysis — all in a 10-page Streamlit app.
 
 ---
 
@@ -46,7 +46,7 @@ The Q&A page uses a proper conversational RAG setup:
 |---|------|-------------|
 | 1 | Dashboard | KPI cards, top-10 revenue chart, market cap scatter |
 | 2 | RAG Chat | Conversational Q&A with memory over financial data |
-| 3 | Anomaly Monitor | AI-narrated anomaly detection with severity tiers |
+| 3 | Anomaly Monitor | Two scan modes: fast rule-based or agentic Claude tool loop |
 | 4 | Company Explorer | Per-company financials, charts, YoY trend analysis |
 | 5 | Daily Digest | One-click AI portfolio executive summary |
 | 6 | Forecasting | Linear regression + Claude analyst outlook |
@@ -54,6 +54,24 @@ The Q&A page uses a proper conversational RAG setup:
 | 8 | Portfolio Trends | Sparkline grid, top/bottom performers |
 | 9 | Sector Analysis | Revenue and margin aggregates by sector |
 | 10 | Company Report | AI analyst report: template-driven, grounded in historical data |
+
+## Agentic Anomaly Detection
+
+Page 3 (Anomaly Monitor) offers two modes:
+
+**Standard Scan** — fast, rule-based Python thresholds check every company for revenue decline, net income drop, PE outlier, and margin compression. Claude writes a 2-3 sentence narrative for each flagged company. Cheap and deterministic.
+
+**Agentic Scan** — Claude drives the full investigation autonomously using tools:
+- `get_company_list` — see all 19 companies + metrics
+- `get_financials` — drill into a company's income statement history
+- `get_metrics` — fetch YoY growth and margin data
+- `get_peers` — compare against sector peers
+- `flag_anomaly` — Claude calls this when it decides something is worth flagging
+- `finish_investigation` — Claude signals it is done
+
+Claude decides what to investigate, how deep to dig, and what severity to assign — the loop runs until Claude calls `finish_investigation`. Both modes produce the same output format so the UI renders identically.
+
+---
 
 ## Company Intelligence Report
 
